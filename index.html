@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PHP TryIt Editor</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css" />
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9f9f9; }
+    .editor-container { display: flex; flex-direction: column; height: 100vh; }
+    .editor-header { background: #2f4f4f; color: white; padding: 10px; font-size: 18px; }
+    .editor-main { display: flex; flex: 1; }
+    .code-editor, .output-panel { width: 50%; padding: 10px; box-sizing: border-box; }
+    .output-panel { background: #fff; border-left: 2px solid #ccc; overflow: auto; }
+    #runBtn { padding: 10px 20px; margin: 10px 0; background: #28a745; border: none; color: white; cursor: pointer; font-size: 16px; }
+  </style>
+</head>
+<body>
+<div class="editor-container">
+  <div class="editor-header">🐘 PHP TryIt Editor – WebAssembly</div>
+  <div class="editor-main">
+    <div class="code-editor">
+      <textarea id="phpCode"><?php echo "Hello from PHP!"; ?></textarea><br/>
+      <button id="runBtn">▶️ Run Code</button>
+    </div>
+    <div class="output-panel" id="output"><strong>Output will appear here...</strong></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/php/php.min.js"></script>
+<script src="php-web.js"></script>
+<script>
+  const editor = CodeMirror.fromTextArea(document.getElementById('phpCode'), {
+    mode: "application/x-httpd-php",
+    lineNumbers: true,
+    theme: "default"
+  });
+
+  let php;
+  const output = document.getElementById("output");
+  PHP.load({ locateFile: file => file }).then(instance => {
+    php = instance;
+    document.getElementById("runBtn").addEventListener("click", async () => {
+      const code = editor.getValue();
+      output.innerHTML = "<em>Running...</em>";
+      try {
+        const result = await php.run(code);
+        output.innerHTML = `<pre>${result.stdout}</pre>`;
+      } catch (err) {
+        output.innerHTML = `<pre style='color:red;'>${err}</pre>`;
+      }
+    });
+  });
+</script>
+</body>
+</html>
